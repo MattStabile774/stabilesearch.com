@@ -63,7 +63,7 @@
             2. Create a new form — Formspree gives you a form ID like "mabcdxyz"
             3. Replace YOUR_FORM_ID below with that ID
           -->
-          <form action="https://formspree.io/f/mvzegaoa" method="POST" class="form-grid">
+          <form action="https://formspree.io/f/mvzegaoa" method="POST" enctype="multipart/form-data" class="form-grid">
             <div>
               <label for="name">Name</label>
               <input type="text" id="name" name="name" required autocomplete="name">
@@ -90,6 +90,10 @@
               <label for="message">Message</label>
               <textarea id="message" name="message" required placeholder="Tell us about the role you're hiring for, or the kind of opportunity you're looking for…"></textarea>
             </div>
+            <div class="full">
+          <label for="resume">Resume / CV <span style="color:var(--muted);font-weight:400;">(optional — PDF or Word)</span></label>
+          <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+        </div>
             <input type="hidden" name="_subject" value="New inquiry via StabileSearch.com">
             <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
             <div class="full">
