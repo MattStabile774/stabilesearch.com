@@ -77,7 +77,7 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; letter-spacing:
   transition: all 0.18s ease; cursor: pointer; background: transparent;
 }
 .btn:hover { border-color: var(--blue-soft); color: #fff; transform: translateY(-1px); }
-.btn-solid { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn.btn-solid { background: var(--blue); border-color: var(--blue); color: #fff; }
 .btn-solid:hover { background: #3d63f0; color: #fff; }
 .btn-light { background: #fff; border-color: #fff; color: var(--ink); }
 .btn-light:hover { background: var(--light); color: var(--ink); }
@@ -172,7 +172,7 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; letter-spacing:
 /* ---------- split ---------- */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
 .split.reverse .split-media { order: 2; }
-.split-media img { border-radius: var(--radius); width: 100%; }
+.split-media img { border-radius: var(--radius); width: 100%; height: auto; object-fit: cover; }
 .split-media.framed { background: var(--light); border-radius: var(--radius); padding: 28px; }
 .split p { color: var(--muted); margin-bottom: 18px; }
 .split .btn { margin-top: 8px; }
