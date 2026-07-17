@@ -2,21 +2,20 @@
  * /api/apply — Vercel serverless function.
  *
  * Receives a job application from the on-site apply form and forwards it to
- * Crelate's public apply endpoint as multipart/form-data — exactly the request
- * Crelate's own portal makes. Because the only per-job variable is the job code
- * (which comes straight from the live /api/jobs feed), this works for every
- * current and future job automatically, with no per-job configuration.
+ * Crelate's candidate-portal Apply API — the exact JSON request Crelate's own
+ * portal makes (captured from the live portal). Because the only per-job
+ * variable is the job code (which comes from the live /api/jobs feed), this
+ * works for every current and future job automatically, with no per-job setup.
  *
- * The browser sends JSON with the resume base64-encoded (avoids multipart
- * parsing on the server). We rebuild it as multipart using the Node 18+ global
- * FormData / Blob / fetch, then post it to Crelate.
+ * The browser sends JSON with the resume base64-encoded; we assemble Crelate's
+ * expected payload and POST it as application/json.
  *
- * Expected JSON body:
- *   { code, firstName, middleName, lastName, email, phone,
- *     filename, fileType, fileBase64 }
+ * Expected JSON body from the browser:
+ *   { code, firstName, lastName, email, phone, filename, fileType, fileBase64 }
  */
 
-const APPLY_BASE = "https://jobs.crelate.com/portal/stabilesearchllc/job/apply/";
+const APPLY_URL = "https://jobs.crelate.com/api/candidateportal/Apply";
+const ORG_ID = "fad5962e-80a5-4d0d-0960-2392ffb2db08";
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -31,17 +30,7 @@ module.exports = async (req, res) => {
     if (typeof body === "string") body = JSON.parse(body || "{}");
     body = body || {};
 
-    const {
-      code,
-      firstName,
-      middleName,
-      lastName,
-      email,
-      phone,
-      filename,
-      fileType,
-      fileBase64,
-    } = body;
+    const { code, firstName, lastName, email, phone, filename, fileType, fileBase64 } = body;
 
     if (!code || !firstName || !lastName) {
       res.status(400).json({ error: "First name, last name and job are required." });
@@ -52,47 +41,64 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const buffer = Buffer.from(fileBase64, "base64");
-    // Guard against oversized payloads (resumes are small; cap ~5MB decoded).
-    if (buffer.length > 5 * 1024 * 1024) {
+    // Size guard: base64 length is ~4/3 of the byte size. Cap at ~5MB decoded.
+    const approxBytes = Math.floor((fileBase64.length * 3) / 4);
+    if (approxBytes > 5 * 1024 * 1024) {
       res.status(413).json({ error: "Resume is too large. Please keep it under 5 MB." });
       return;
     }
 
-    const form = new FormData();
-    form.append("firstName", String(firstName));
-    form.append("middleName", middleName ? String(middleName) : "");
-    form.append("lastName", String(lastName));
-    form.append("email", email ? String(email) : "");
-    form.append("phone", phone ? String(phone) : "");
-    const blob = new Blob([buffer], { type: fileType || "application/octet-stream" });
-    form.append("file-uploadResume", blob, filename || "resume.pdf");
-
-    const applyUrl = APPLY_BASE + encodeURIComponent(code);
-
-    const upstream = await fetch(applyUrl, {
-      method: "POST",
-      body: form,
-      headers: {
-        // Mimic the portal's own submission so any server-side origin checks pass.
-        Referer: applyUrl,
-        Origin: "https://jobs.crelate.com",
-        "User-Agent":
-          "Mozilla/5.0 (compatible; StabileSearchApply/1.0; +https://www.stabilesearch.com)",
+    // Payload shape captured from Crelate's own portal submission.
+    const payload = {
+      Answers: {},
+      Disability: null,
+      Email: email || "",
+      Ethnicity: null,
+      FirstName: firstName,
+      Gender: null,
+      JobCode: code,
+      LastName: lastName,
+      OrganizationId: ORG_ID,
+      Phone: phone || "",
+      ReferrerCode: null,
+      ReferrerUrl: "",
+      UtmSource: null,
+      Resume: {
+        Data: fileBase64,
+        FileName: filename || "resume.pdf",
+        ContentType: fileType || "application/octet-stream",
       },
+    };
+
+    const upstream = await fetch(APPLY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Origin: "https://jobs.crelate.com",
+        Referer: "https://jobs.crelate.com/portal/stabilesearchllc/job/apply/" + encodeURIComponent(code),
+      },
+      body: JSON.stringify(payload),
     });
 
-    // Crelate returns 200 (or a redirect that resolves to a thank-you page) on
-    // success. Treat any non-error status as accepted; the end-to-end test
-    // confirms the record actually lands in Crelate.
-    if (upstream.status >= 200 && upstream.status < 400) {
-      res.status(200).json({ ok: true });
+    let data = null;
+    try {
+      data = await upstream.json();
+    } catch (e) {
+      data = null;
+    }
+
+    // Crelate returns { ApplicationId, Errors, InstanceId, Success }.
+    const success = upstream.ok && data && data.Success === true && data.ApplicationId;
+
+    if (success) {
+      res.status(200).json({ ok: true, applicationId: data.ApplicationId });
     } else {
-      const text = await upstream.text().catch(() => "");
+      const errs = data && Array.isArray(data.Errors) ? data.Errors.join("; ") : "";
       res.status(502).json({
-        error: "Crelate did not accept the application.",
+        error: errs || "Crelate did not accept the application. Please try again.",
         status: upstream.status,
-        detail: text.slice(0, 300),
+        crelate: data || null,
       });
     }
   } catch (err) {
