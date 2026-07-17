@@ -11,7 +11,8 @@
  * expected payload and POST it as application/json.
  *
  * Expected JSON body from the browser:
- *   { code, firstName, lastName, email, phone, filename, fileType, fileBase64 }
+ *   { code, firstName, lastName, email, phone, filename, fileType, fileBase64,
+ *     website (honeypot), elapsedMs }
  */
 
 const APPLY_URL = "https://jobs.crelate.com/api/candidateportal/Apply";
@@ -30,7 +31,15 @@ module.exports = async (req, res) => {
     if (typeof body === "string") body = JSON.parse(body || "{}");
     body = body || {};
 
-    const { code, firstName, lastName, email, phone, filename, fileType, fileBase64 } = body;
+    const { code, firstName, lastName, email, phone, filename, fileType, fileBase64, website, elapsedMs } = body;
+
+    // Spam protection: honeypot ("website" must stay empty) + timing gate.
+    // Bots fill hidden fields and submit near-instantly. Pretend success so the
+    // bot moves on, but never forward to Crelate.
+    if ((website && String(website).trim() !== "") || (typeof elapsedMs === "number" && elapsedMs < 1500)) {
+      res.status(200).json({ ok: true, applicationId: null });
+      return;
+    }
 
     if (!code || !firstName || !lastName) {
       res.status(400).json({ error: "First name, last name and job are required." });

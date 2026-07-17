@@ -1,8 +1,12 @@
 /* Stabile Search — on-site job detail + apply page (job.html).
    Loads a single role from /api/job and submits applications through /api/apply,
-   so candidates view and apply without ever leaving stabilesearch.com. */
+   so candidates view and apply without ever leaving stabilesearch.com.
+   Also supports code=general for open (general-consideration) applications,
+   emits Google for Jobs (JobPosting) structured data, and includes lightweight
+   spam protection (honeypot + timing). */
 (function () {
   var MAX_FILE_MB = 5;
+  var renderedAt = Date.now();
 
   function qs(id) { return document.getElementById(id); }
 
@@ -46,6 +50,62 @@
 
   if (!code) { renderError("No role was specified."); return; }
 
+  /* ---- Google for Jobs (schema.org JobPosting) ---- */
+  function injectJobPosting(job) {
+    try {
+      var ld = {
+        "@context": "https://schema.org/",
+        "@type": "JobPosting",
+        "title": job.title,
+        "description": job.description || job.title,
+        "datePosted": job.postedOn,
+        "employmentType": "FULL_TIME",
+        "directApply": true,
+        "hiringOrganization": {
+          "@type": "Organization",
+          "name": "Stabile Search LLC",
+          "sameAs": "https://www.stabilesearch.com"
+        },
+        "identifier": {
+          "@type": "PropertyValue",
+          "name": "Stabile Search",
+          "value": job.code
+        }
+      };
+      if (job.city || job.state) {
+        ld.jobLocation = {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": job.city || undefined,
+            "addressRegion": job.state || undefined,
+            "addressCountry": job.country || "US"
+          }
+        };
+      }
+      if (job.compMin || job.compMax) {
+        ld.baseSalary = {
+          "@type": "MonetaryAmount",
+          "currency": "USD",
+          "value": {
+            "@type": "QuantitativeValue",
+            "minValue": job.compMin || undefined,
+            "maxValue": job.compMax || undefined,
+            "unitText": "YEAR"
+          }
+        };
+      }
+      if (job.postedOn) {
+        var vt = new Date(job.postedOn);
+        if (!isNaN(vt)) { vt.setDate(vt.getDate() + 90); ld.validThrough = vt.toISOString(); }
+      }
+      var el = document.createElement("script");
+      el.type = "application/ld+json";
+      el.text = JSON.stringify(ld);
+      document.head.appendChild(el);
+    } catch (e) { /* non-fatal */ }
+  }
+
   function renderJob(job) {
     document.title = job.title + " | Stabile Search";
     qs("job-company").textContent = (job.company || "Stabile Search") +
@@ -73,6 +133,26 @@
       qs("r-meta").textContent = [r.jobTitle, r.phone].filter(Boolean).join(" · ");
       box.hidden = false;
     }
+
+    injectJobPosting(job);
+  }
+
+  /* ---- General consideration (code=general): no specific posting ---- */
+  function renderGeneral() {
+    document.title = "General Consideration | Stabile Search";
+    qs("job-company").textContent = "Stabile Search · New York, NY";
+    qs("job-title").textContent = "Submit your resume for general consideration";
+    qs("job-facts").innerHTML =
+      '<span class="job-fact">Quant Finance · AI · Data Science</span>' +
+      '<span class="job-fact comp">Confidential searches</span>';
+    qs("job-body").innerHTML =
+      "<p>Many of our searches are never posted publicly. If you're a strong quantitative " +
+      "researcher, trader, ML researcher, engineer or data scientist, send us your resume and " +
+      "we'll reach out when a role matches your background.</p>" +
+      "<p>Everything is confidential — your materials are only ever shared with your explicit " +
+      "consent, and never with your current employer.</p>";
+    var h2 = document.querySelector("#apply-card h2");
+    if (h2) h2.textContent = "Submit your resume";
   }
 
   function fileToBase64(file) {
@@ -120,6 +200,7 @@
       var lastName = qs("lastName").value.trim();
       var email = qs("email").value.trim();
       var phone = qs("phone").value.trim();
+      var hp = (qs("company_site") ? qs("company_site").value : "").trim();
       var fileInput = qs("resume");
       var file = fileInput.files && fileInput.files[0];
 
@@ -147,6 +228,8 @@
             filename: file.name,
             fileType: file.type,
             fileBase64: b64,
+            website: hp,                     // honeypot (should stay empty)
+            elapsedMs: Date.now() - renderedAt
           }),
         });
       }).then(function (r) {
@@ -166,6 +249,12 @@
         setStatus("Network error. Please try again, or email matt@stabilesearch.com.", "err");
       });
     });
+  }
+
+  if (code === "general") {
+    renderGeneral();
+    initForm();
+    return;
   }
 
   fetch("/api/job?code=" + encodeURIComponent(code))
