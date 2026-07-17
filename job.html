@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Role | Stabile Search</title>
+  <meta name="description" content="Apply directly to a live open role represented by Stabile Search — New York City's quantitative finance, AI and data science recruitment firm.">
+  <link rel="canonical" href="https://www.stabilesearch.com/job.html">
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    /* ---- job detail page ---- */
+    .job-detail { display: grid; grid-template-columns: 1fr 380px; gap: 48px; align-items: start; }
+    .job-body h2, .job-body h3 { color: #fff; margin: 26px 0 10px; }
+    .job-body p { color: var(--muted); margin-bottom: 14px; }
+    .job-body ul, .job-body ol { color: var(--muted); margin: 0 0 16px 22px; }
+    .job-body li { margin-bottom: 8px; }
+    .job-body strong, .job-body b { color: var(--text); }
+    .job-body a { color: var(--blue-soft); }
+    .job-detail-facts { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 4px; }
+
+    .apply-card {
+      position: sticky; top: 100px;
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 26px;
+    }
+    .apply-card h2 { font-size: 21px; color: #fff; margin-bottom: 6px; }
+    .apply-card .form-note { margin-top: 0; margin-bottom: 18px; }
+    .apply-card .form-grid { gap: 14px; }
+    .file-field { position: relative; }
+    .file-field input[type="file"] {
+      width: 100%; background: var(--ink-2); border: 1px dashed var(--line);
+      border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--muted);
+      font-family: var(--sans); cursor: pointer;
+    }
+    .apply-submit { width: 100%; margin-top: 4px; }
+    .apply-status { font-size: 14px; margin-top: 14px; line-height: 1.5; }
+    .apply-status.ok { color: #7ee3a7; }
+    .apply-status.err { color: #ff9d9d; }
+
+    .recruiter {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line);
+    }
+    .recruiter img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; }
+    .recruiter .r-name { color: #fff; font-weight: 600; font-size: 15px; }
+    .recruiter .r-meta { color: var(--muted); font-family: var(--mono); font-size: 12.5px; }
+
+    .back-link { font-family: var(--mono); font-size: 13px; color: var(--blue-soft); display: inline-block; margin-bottom: 18px; }
+
+    .thankyou {
+      text-align: center; padding: 20px 4px;
+    }
+    .thankyou .check {
+      width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 16px;
+      background: rgba(78,116,255,0.14); border: 1px solid rgba(78,116,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--blue-soft); font-size: 26px;
+    }
+    .thankyou h2 { font-size: 22px; }
+
+    @media (max-width: 940px) {
+      .job-detail { grid-template-columns: 1fr; gap: 32px; }
+      .apply-card { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="/">Stabile<span class="b2">Search</span></a>
+      <button class="nav-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/employers.html">For Employers</a></li>
+        <li><a href="/candidates.html">For Candidates</a></li>
+        <li><a href="/jobs.html" aria-current="page">Open Roles</a></li>
+        <li><a class="btn btn-solid" href="/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="wrap">
+        <a class="back-link" href="/jobs.html">← Back to Open Roles</a>
+        <p class="eyebrow" id="job-company">Stabile Search</p>
+        <h1 id="job-title">Loading role…</h1>
+        <div class="job-detail-facts" id="job-facts"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="job-detail">
+          <div class="job-body" id="job-body">
+            <div class="skeleton" style="height:320px;"></div>
+          </div>
+
+          <aside>
+            <div class="apply-card" id="apply-card">
+              <h2>Apply</h2>
+              <p class="form-note">Your application goes directly to Stabile Search — represented confidentially.</p>
+              <form id="apply-form" novalidate>
+                <div class="form-grid">
+                  <div>
+                    <label for="firstName">First name *</label>
+                    <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
+                  </div>
+                  <div>
+                    <label for="lastName">Last name *</label>
+                    <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
+                  </div>
+                  <div class="full">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email">
+                  </div>
+                  <div class="full">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" autocomplete="tel">
+                  </div>
+                  <div class="full file-field">
+                    <label for="resume">Resume — PDF / DOC / DOCX *</label>
+                    <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                  </div>
+                  <div class="full">
+                    <button type="submit" class="btn btn-solid apply-submit" id="apply-submit">Submit application</button>
+                  </div>
+                </div>
+                <div class="apply-status" id="apply-status" role="status" aria-live="polite"></div>
+              </form>
+
+              <div class="recruiter" id="recruiter" hidden>
+                <img id="r-img" src="" alt="" width="54" height="54">
+                <div>
+                  <div class="r-name" id="r-name"></div>
+                  <div class="r-meta" id="r-meta"></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <img class="footer-logo" src="/images/stabile-search-logo.png" alt="Stabile Search logo" width="132">
+          <p>Stabile Search is New York City's top recruitment firm for Quantitative Finance, AI and Data Science, founded by <a href="https://www.mattstabile.com/">Matt Stabile</a>.</p>
+        </div>
+        <div>
+          <h4>Menu</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/employers.html">For Employers</a></li>
+            <li><a href="/candidates.html">For Candidates</a></li>
+            <li><a href="/jobs.html">Open Roles</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="https://www.linkedin.com/in/mattstabile/" rel="me">LinkedIn</a></li>
+            <li><a href="https://www.mattstabile.com/">MattStabile.com</a></li>
+            <li><a href="mailto:matt@stabilesearch.com">matt@stabilesearch.com</a></li>
+            <li><a href="tel:+16468594996">(646) 859-4996</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Stabile Search LLC. All rights reserved.</span>
+        <span>New York, New York, United States</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/job-detail.js" defer></script>
+</body>
+</html>
