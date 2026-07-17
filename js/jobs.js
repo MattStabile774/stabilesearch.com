@@ -40,6 +40,11 @@
     return s.length > n ? s.slice(0, n).replace(/\s+\S*$/, "") + "…" : s;
   }
 
+  // On-site detail + apply page for a given job (keyed by the Crelate job code).
+  function jobUrl(job) {
+    return "/job.html?code=" + encodeURIComponent(job.code);
+  }
+
   function cardHTML(job, compact) {
     var comp = compRange(job);
     var loc = location(job);
@@ -56,7 +61,7 @@
         "</div>" +
         '<div class="job-side">' +
           '<span class="job-date">Posted ' + esc(fmtDate(job.postedOn)) + "</span>" +
-          '<a class="btn btn-solid" href="' + esc(job.applyUrl) + '" target="_blank" rel="noopener">View &amp; Apply</a>' +
+          '<a class="btn btn-solid" href="' + jobUrl(job) + '">View &amp; Apply</a>' +
         "</div>" +
       "</article>"
     );
