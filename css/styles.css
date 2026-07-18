@@ -177,6 +177,11 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; letter-spacing:
 .split p { color: var(--muted); margin-bottom: 18px; }
 .split .btn { margin-top: 8px; }
 
+/* founder split (home — "Meet Matt Stabile") */
+.founder-split { grid-template-columns: 0.74fr 1fr; gap: 56px; }
+.founder-split .split-media img { max-width: 449px; margin: 0 auto; border-radius: 16px; }
+.founder-split .section-title { font-size: clamp(32px, 5vw, 57px); }
+
 /* ---------- quote ---------- */
 .quote { text-align: center; max-width: 860px; margin: 0 auto; }
 .quote blockquote {
@@ -302,6 +307,7 @@ textarea { min-height: 150px; resize: vertical; }
 /* ---------- responsive ---------- */
 @media (max-width: 940px) {
   .hero-grid, .split, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+  .founder-split { grid-template-columns: 1fr; gap: 40px; }
   .split.reverse .split-media { order: 0; }
   .cards, .stats, .featured-jobs { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr 1fr; }
