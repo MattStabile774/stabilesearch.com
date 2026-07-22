@@ -2,6 +2,11 @@
 (function () {
   var PORTAL_URL = "https://jobs.crelate.com/portal/stabilesearchllc";
 
+  // Job titles are links to the detail page — keep them white, highlight on hover.
+  var st = document.createElement("style");
+  st.textContent = ".job-card h3 a{color:#fff;text-decoration:none}.job-card h3 a:hover{color:var(--blue-soft)}";
+  document.head.appendChild(st);
+
   function money(n) {
     if (n == null || isNaN(n)) return null;
     if (n >= 1e6) {
@@ -48,10 +53,11 @@
   function cardHTML(job, compact) {
     var comp = compRange(job);
     var loc = location(job);
+    var url = jobUrl(job);
     return (
       '<article class="job-card">' +
         "<div>" +
-          "<h3>" + esc(job.title) + "</h3>" +
+          '<h3><a href="' + url + '">' + esc(job.title) + "</a></h3>" +
           '<div class="job-facts">' +
             (loc ? '<span class="job-fact">📍 ' + esc(loc) + "</span>" : "") +
             (comp ? '<span class="job-fact comp">' + esc(comp) + " total comp</span>" : "") +
@@ -61,7 +67,7 @@
         "</div>" +
         '<div class="job-side">' +
           '<span class="job-date">Posted ' + esc(fmtDate(job.postedOn)) + "</span>" +
-          '<a class="btn btn-solid" href="' + jobUrl(job) + '">View &amp; Apply</a>' +
+          '<a class="btn btn-solid" href="' + url + '">View &amp; Apply</a>' +
         "</div>" +
       "</article>"
     );
