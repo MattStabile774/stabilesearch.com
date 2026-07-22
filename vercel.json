@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/images/press/:file", "destination": "/api/press-image?f=:file" }
+  ]
+}
