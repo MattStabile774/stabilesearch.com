@@ -112,7 +112,7 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; letter-spacing:
 .lede strong { color: var(--text); }
 .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
 .hero-media { position: relative; }
-.hero-media img { width: 100%; border-radius: var(--radius); }
+.hero-media img { width: 100%; border-radius: 0; }
 .hero-panel {
   background: var(--light); border-radius: var(--radius);
   padding: 26px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
@@ -172,14 +172,14 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; letter-spacing:
 /* ---------- split ---------- */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
 .split.reverse .split-media { order: 2; }
-.split-media img { border-radius: var(--radius); width: 100%; height: auto; object-fit: cover; }
+.split-media img { border-radius: 0; width: 100%; height: auto; object-fit: cover; }
 .split-media.framed { background: var(--light); border-radius: var(--radius); padding: 28px; }
 .split p { color: var(--muted); margin-bottom: 18px; }
 .split .btn { margin-top: 8px; }
 
 /* founder split (home — "Meet Matt Stabile") */
 .founder-split { grid-template-columns: 0.74fr 1fr; gap: 56px; }
-.founder-split .split-media img { max-width: 449px; margin: 0 auto; border-radius: 16px; }
+.founder-split .split-media img { max-width: 449px; margin: 0 auto; border-radius: 0; }
 .founder-split .section-title { font-size: clamp(32px, 5vw, 57px); }
 
 /* ---------- quote ---------- */
